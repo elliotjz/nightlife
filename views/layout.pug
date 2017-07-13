@@ -1,0 +1,35 @@
+doctype
+html
+	head
+		title Nightlife Coordination App
+		link(rel='stylesheet', type='text/css', href='css/bootstrap.min.css')
+		link(rel='stylesheet', type='text/css', href='css/main.css')
+		link(href="https://fonts.googleapis.com/css?family=Roboto", rel="stylesheet")
+		block scripts
+	body
+		nav.navbar.navbar-inverse.navbar-static-top
+			div.container-fluid
+				div.navbar-header.pull-left
+					a(href="/").navbar-brand Nightlife Coordination App
+				if user.name
+					div.navbar-header.pull-right
+						ul.nav.navbar-nav.navbar-right
+							li.dropdown
+								a(data-toggle='dropdown', role='button', aria-haspopup="true", aria-expanded="false").dropdown-toggle #{user.name}
+									span.caret
+								ul.dropdown-menu
+									li
+										a(href="/signout") Sign Out
+									li
+										a(href="/my-polls") My RSVPs
+				else
+					div.navbar-header.pull-right
+						ul.nav.navbar-nav.navbar-right
+							li
+								a(href="/signin") Sign In With Twitter
+		div.container.head-bar
+			block head-bar
+		div.page
+			block page
+		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
+		script(src="js/bootstrap.min.js")
