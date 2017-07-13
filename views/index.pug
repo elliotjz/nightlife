@@ -3,4 +3,20 @@ extends layout
 
 block page
 	h1 Welcome to the nightlife app
-	p plan your night here
+	form(action="/search", method="post").form-group
+		input(type="text", name="query", placeholder="Where are you?").form-control
+		span.input-group-btn
+			button(type="submit").btn.btn-default Search
+
+	if results.businesses
+		div.container.results-container
+			each business in results.businesses
+				div.container.business
+					a(href=business.url)
+						img(src=business.image_url, alt=business.name).result-image
+						div.results-details
+							h4= business.name
+							p= business.categories[0].title
+							p= "Price: " + business.price
+							p= "Address: " + business.location.address1
+

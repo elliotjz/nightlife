@@ -2,3 +2,32 @@
 body {
 	font-family: 'Roboto', sans-serif;
 }
+
+.form-group {
+	max-width: 500px;
+	margin: auto;
+}
+
+
+.results-container {
+
+}
+
+.business {
+	border: 1px solid #ddd;
+	height: 140px;
+	margin: 20px auto;
+	max-width: 700px;
+	padding: 0;
+}
+
+.result-image {
+	max-height: 100px;
+	max-width: 100px;
+	margin: 20px;
+	float: left;
+}
+
+.results-details {
+	margin: auto;
+}
