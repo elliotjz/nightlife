@@ -3,11 +3,18 @@ body {
 	font-family: 'Roboto', sans-serif;
 }
 
-.form-group {
+.page {
+	text-align: center;
+}
+
+h1 {
+	margin: 40px auto;
+}
+
+.input-group {
 	max-width: 500px;
 	margin: auto;
 }
-
 
 .results-container {
 
@@ -19,6 +26,15 @@ body {
 	margin: 20px auto;
 	max-width: 700px;
 	padding: 0;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+}
+
+.image-container {
+	width: 140px;
+	padding: 0;
+	margin: 0;
 }
 
 .result-image {
@@ -31,3 +47,13 @@ body {
 .results-details {
 	margin: auto;
 }
+
+.results-going {
+	width: 140px;
+}
+
+.results-going button {
+	
+}
+
+
