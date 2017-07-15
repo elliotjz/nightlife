@@ -27,7 +27,7 @@ let userSchema = new mongoose.Schema({
 })
 let rsvpSchema = new mongoose.Schema({
     id: String,
-    going: Array
+    going: Number
 })
 let UserModel = mongoose.model('users', userSchema);
 let RsvpModel = mongoose.model('rsvps', rsvpSchema);
@@ -79,6 +79,54 @@ module.exports = function(app, passport) {
         })
     })
 
+    app.post("/going", urlencodedParser, function(req, res) {
+        let venueId = req.body.venueId;
+        RsvpModel.findOne({ id: venueId }, function(err, data) {
+            if (err) throw err;
+            if (data) {
+                let numberGoing = data.going;
+                RsvpModel.update({ id: venueId }, {
+                    $set: { going: numberGoing + 1 }
+                }, function(err, data) {
+                    if (err) throw err;
+                })
+            } else {
+                let newRsvp = {
+                    id: venueId,
+                    going: 1
+                }
+                let newRsvpDoc = RsvpModel(newRsvp).save(function(err, data) {
+                    if (err) throw err;
+                });
+            }
+        })
+
+        let obj = { myData: "datadatadatad"};
+        res.json(obj);
+        /*
+        let newRsvp = {};
+        newRsvp[req.body.businessId] = true;
+        console.log("newRsvp: ");
+        console.log(newRsvp);
+        UserModel.findOne({id: req.user._json.id_str }, function(err, data) {
+            if (err) throw err;
+
+            let rsvps = {};
+            if (data) {
+                rsvps = data.rsvps;
+            }
+            rsvps[req.body.businessId] = true;
+            UserModel.update({ id: req.user._json.id_str }, {
+                $set: { rsvps: rsvps }
+                }, function(err, data) {
+                    if (err) throw err;
+                }
+            )
+        })
+        res.end();
+        */
+    })
+
 	app.get("/signin", function(req, res){
         twitterAuthenticator(req, res);
     })
@@ -86,15 +134,12 @@ module.exports = function(app, passport) {
     var twitterAuthenticator = passport.authenticate("twitter");
 
     app.get("/signout", function(req, res){
-        PollModel.find({}, function(err, polls) {
-            if (err) throw err;
-            var username;
-            if(req.user) username = req.user.username;
-            else username = "user";
-            req.session.destroy();
-            res.locals.user = null;
-            res.render("signout", { user: {}, polls: polls });
-        })
+        var username;
+        if(req.user) username = req.user.username;
+        else username = "user";
+        req.session.destroy();
+        res.locals.user = null;
+        res.render("index", { user: {}, results: {} });
     });
 
     var authenticateNewUser = passport.authenticate("twitter", { failureRedirect: "/signout" });
@@ -107,24 +152,16 @@ module.exports = function(app, passport) {
                 name: req.user.displayName,
                 rsvps: {}
             }
-            UserModel.find({ id: newUser.id }, function(err, data) {
+            UserModel.findOne({ id: newUser.id }, function(err, data) {
                 if (err) throw err;
-                console.log("data: " + data);
-                console.log("typeof data: " + (typeof data));
-                if (!data) {
+                if (!data || data == {}) {
                     let newUserDoc = UserModel(newUser).save(function(err, data) {
                         if (err) throw err;
                     })
                 } else {
-                    console.log("user ID: " + newUser.id);
-                    let newRsvp = {"one": 345};
-                    UserModel.update({ id: newUser.id }, {
-                        $set: { rsvps: newRsvp }
-                        }, function(err, data) {
-                            if (err) throw err;
-                        }
-                    )
+                    
                 }
+                res.redirect("/");
                 
             })
         }
