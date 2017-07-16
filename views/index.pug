@@ -2,12 +2,12 @@
 extends layout
 
 block scripts
-	script(src="js/goingBtn.js")
+	script(src="js/index.js")
 
 block page
 	h1 Welcome to the nightlife app
 	form(action="/search", method="post").input-group
-		input(type="text", name="query", placeholder="Where are you?").form-control
+		input(type="text", name="query", placeholder="Where are you?", value=lastSearch).form-control
 		span.input-group-btn
 			button(type="submit").btn.btn-secondary Search
 
@@ -25,4 +25,9 @@ block page
 						p= "Price: " + business.price
 						p= "Address: " + business.location.address1
 					div.results-going
-						button(type="submit", name="businessId", value=business.id).btn.btn-default.going-btn 0 Going
+						div.going
+							p 0 Going
+						if user.id
+							button(type="submit", name="businessId", value=business.id).btn.btn-default.going-btn Count Me In!
+						else
+							button(type="button",data-toggle="tooltip", data-placement="top", title="You must sign in to RSVP").btn.btn-default Count Me In!
