@@ -3,13 +3,12 @@
 const bodyParser = require('body-parser');
 const yelp = require('yelp-fusion');
 const mongoose = require('mongoose');
-const env = require('./env');
 
 const urlencodedParser = bodyParser.urlencoded({extended: false});
 
 // Setup YELP API
-const clientId = env.yelp.CLIENT_ID;
-const clientSecret = env.yelp.CLIENT_SECRET;
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
 let accessToken;
 
 const token = yelp.accessToken(clientId, clientSecret).then(response => {
@@ -21,7 +20,7 @@ const token = yelp.accessToken(clientId, clientSecret).then(response => {
 
 
 // Setup Mongoose & MLAB
-mongoose.connect(env.MLAB_URL);
+mongoose.connect(process.env.MLAB_URL);
 let userSchema = new mongoose.Schema({
     id: String,
     name: String,
