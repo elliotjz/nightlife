@@ -25,11 +25,10 @@ mongoose.connect(env.MLAB_URL);
 let userSchema = new mongoose.Schema({
     id: String,
     name: String,
-    lastSearch: String
 })
 let rsvpSchema = new mongoose.Schema({
     id: String,
-    going: Array
+    rsvps: Object
 })
 let UserModel = mongoose.model('users', userSchema);
 let RsvpModel = mongoose.model('rsvps', rsvpSchema);
@@ -47,7 +46,7 @@ module.exports = function(app, passport) {
         }
 		res.render("index", {
 			user: user,
-            results: results
+            results: {}
 		});
 	})
 
@@ -60,92 +59,87 @@ module.exports = function(app, passport) {
         if (req.user) {
             user.name = req.user.displayName;
             user.id = req.user._json.id_str;
-        } else {
-            //console.log(req.headers['x-forwarded-for']);
-            //console.log(req.connection.remoteAddress);
-            user.id = "IP" + req.connection.remoteAddress;
         }
-        user.lastSearch = req.body.query;
-        
-        // Updating last search data for user
-        UserModel.findOne( { id: user.id }, function(err, data) {
-            if (err) throw err;
-            if (!data) {
-                let newUserDoc = UserModel(user).save(function(err, data) {
-                    if (err) throw err;
-                })
-            } else {
-                UserModel.update({ id: user.id }, {
-                    $set: { lastSearch: req.body.query }
-                }, function(err, data) {
-                    if (err) throw err;
-                })
-            }
-        })
 
-        // Finding RSVP info for venues
-        RsvpModel.find({}, function(err, rsvps) {
-            if (err) throw err;
+        // Search
+        const client = yelp.client(accessToken);
 
-            // Search
-            const client = yelp.client(accessToken);
+        client.search({
+            categories:'nightlife',
+            location: req.body.query
+        }).then(response => {
 
-            client.search({
-                categories:'nightlife',
-                location: req.body.query
-            }).then(response => {
-
-                // Render results
-                let results = {};
-                results.businesses = response.jsonBody.businesses;
-                res.render("index", {
-                    user: user,
-                    results: results,
-                    rsvps: rsvps,
-                    lastSearch: req.body.query
-                });
-            }).catch(e => {
-                console.log(e);
-                res.render("index", {
-                    user: user,
-                    results: {},
-                });
+            // Render results
+            let results = {};
+            results.businesses = response.jsonBody.businesses;
+            res.render("index", {
+                user: user,
+                results: results,
             });
-        })
+        }).catch(e => {
+            console.log(e);
+            res.render("index", {
+                user: user,
+                results: {},
+            });
+        });
     })
 
 
 
     app.post("/going", urlencodedParser, function(req, res) {
         
+        let currentDate = new Date;
+        let dateString = currentDate.toDateString();
+
         let venueId = req.body.venueId;
         let userId = req.user._json.id_str;
 
-        RsvpModel.findOne({ id: venueId }, function(err, data) {
+        RsvpModel.findOne({ id: dateString }, function(err, data) {
             if (err) throw err;
-            if (data) {
 
-                let goingArr = data.going;
-                goingArr.push(userId);
+            // If there is no data for this day
+            if (!data) {
+                let rsvpData = {
+                    id: dateString,
+                    rsvps: {}
+                };
+                rsvpData.rsvps[venueId] = [userId];
 
-                RsvpModel.update({ id: venueId }, {
-                    $set: { going: goingArr }
-                }, function(err, data) {
+                let newRsvpData = RsvpModel(rsvpData).save(function(err, data) {
                     if (err) throw err;
                 })
             } else {
+                let rsvps = data.rsvps;
+                console.log("rsvps:");
+                console.log(rsvps);
 
-                let newRsvp = {
-                    id: venueId,
-                    going: [userId]
+                console.log("rsvps[venueId].indexOf(userId):");
+                console.log(rsvps[venueId].indexOf(userId));
+
+                if (rsvps[venueId]) {
+                    if (rsvps[venueId].indexOf(userId) == -1) {
+
+                        let goingArr = rsvps[venueId];
+                        goingArr.push(userId);
+                        rsvps[venueId] = goingArr;
+                    }
+                    
+                } else {
+                    rsvps[venueId] = [userId];
                 }
 
-                let newRsvpDoc = RsvpModel(newRsvp).save(function(err, data) {
+                console.log("rsvps after:");
+                console.log(rsvps);
+
+                RsvpModel.update({ id: dateString }, {
+                    $set: { rsvps: rsvps }
+                }, function(err, data) {
                     if (err) throw err;
-                });
+                })
             }
         })
-        res.end();
+        res.json({didItWork: "yes"});
     })
 
 

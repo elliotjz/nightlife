@@ -6,8 +6,8 @@ block scripts
 
 block page
 	h1 Welcome to the nightlife app
-	form(action="/search", method="post").input-group
-		input(type="text", name="query", placeholder="Where are you?", value=lastSearch).form-control
+	form(action="/search", method="post").input-group#search-form
+		input(type="text", name="query", placeholder="Where are you?").form-control#search-bar
 		span.input-group-btn
 			button(type="submit").btn.btn-secondary Search
 
@@ -27,7 +27,7 @@ block page
 					div.results-going
 						div.going
 							p 0 Going
-						if user.id
+						if user.name
 							button(type="submit", name="businessId", value=business.id).btn.btn-default.going-btn Count Me In!
 						else
-							button(type="button",data-toggle="tooltip", data-placement="top", title="You must sign in to RSVP").btn.btn-default Count Me In!
+							button(type="button", data-toggle="tooltip", data-placement="top", title="You must sign in to RSVP").btn.btn-default Count Me In!
