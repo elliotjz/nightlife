@@ -19,7 +19,7 @@ block page
 						a(href=business.url, target="_blank")
 							img(src=business.image_url, alt=business.name).result-image
 					div.results-details
-						a(href=business.url)
+						a(href=business.url, target="_blank")
 							h4= business.name
 						p= business.categories[0].title
 						p= "Price: " + business.price
