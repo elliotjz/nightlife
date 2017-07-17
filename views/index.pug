@@ -16,7 +16,7 @@ block page
 			each business in results.businesses
 				div.container.business
 					div.image-container
-						a(href=business.url)
+						a(href=business.url, target="_blank")
 							img(src=business.image_url, alt=business.name).result-image
 					div.results-details
 						a(href=business.url)
