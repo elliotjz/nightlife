@@ -22,12 +22,15 @@ $(document).ready(function() {
 	});
 
 	$(".going-btn").on("click", function() {
-		$(this).attr("class", "btn-success");
+		$(this).toggleClass("btn-success");
+		$(this).toggleClass("btn-default");
 
 		let params = { venueId: $(this).val() };
 		$.post('/going', params, function(data){
-			console.log("done");
-			console.log(data);
+			for (venueId in data.rsvps) {
+				// Update count on venue info
+				$("#" + venueId + "-count").html(data.rsvps[venueId].length + " Going");
+			}
 		})
 	});
 

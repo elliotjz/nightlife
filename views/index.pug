@@ -26,8 +26,15 @@ block page
 						p= "Address: " + business.location.address1
 					div.results-going
 						div.going
-							p 0 Going
+							if rsvps && business.id in rsvps
+								p(id=(business.id + "-count"))= rsvps[business.id].length + " Going"
+							else
+								p(id=(business.id + "-count")) 0 Going
 						if user.name
-							button(type="submit", name="businessId", value=business.id).btn.btn-default.going-btn Count Me In!
+							if rsvps && business.id in rsvps && rsvps[business.id].indexOf(user.id) != -1
+								button(type="submit", name="businessId", value=business.id).btn.btn-success.going-btn Count Me In!
+							else
+								button(type="submit", name="businessId", value=business.id).btn.btn-default.going-btn Count Me In!
 						else
 							button(type="button", data-toggle="tooltip", data-placement="top", title="You must sign in to RSVP").btn.btn-default Count Me In!
+

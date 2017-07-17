@@ -72,10 +72,30 @@ module.exports = function(app, passport) {
             // Render results
             let results = {};
             results.businesses = response.jsonBody.businesses;
-            res.render("index", {
-                user: user,
-                results: results,
-            });
+
+            // get rsvp data
+
+            let currentDate = new Date;
+            let dateString = currentDate.toDateString();
+
+
+            RsvpModel.findOne({ id: dateString }, function(err, data) {
+                if (err) throw err;
+
+                let rsvps;
+
+                if (data) {
+                    rsvps = data.rsvps;
+                }
+
+                res.render("index", {
+                    user: user,
+                    results: results,
+                    rsvps: rsvps
+                });
+            })
+
+            
         }).catch(e => {
             console.log(e);
             res.render("index", {
@@ -109,37 +129,42 @@ module.exports = function(app, passport) {
                 let newRsvpData = RsvpModel(rsvpData).save(function(err, data) {
                     if (err) throw err;
                 })
+
+                res.json({ rsvps: rsvpData.rsvps });
+
             } else {
+
                 let rsvps = data.rsvps;
-                console.log("rsvps:");
-                console.log(rsvps);
 
-                console.log("rsvps[venueId].indexOf(userId):");
-                console.log(rsvps[venueId].indexOf(userId));
-
+                // if the venue already has data for that day
                 if (rsvps[venueId]) {
+
+                    // if the user has already send an rsvp
                     if (rsvps[venueId].indexOf(userId) == -1) {
 
                         let goingArr = rsvps[venueId];
                         goingArr.push(userId);
                         rsvps[venueId] = goingArr;
+                    } else {
+                        // Remove rsvp
+                        let indexToRemove = rsvps[venueId].indexOf(userId);
+                        rsvps[venueId].splice(indexToRemove, 1);
                     }
                     
                 } else {
                     rsvps[venueId] = [userId];
                 }
 
-                console.log("rsvps after:");
-                console.log(rsvps);
-
                 RsvpModel.update({ id: dateString }, {
                     $set: { rsvps: rsvps }
                 }, function(err, data) {
                     if (err) throw err;
                 })
+
+                res.json({ rsvps: rsvps });
             }
+
         })
-        res.json({didItWork: "yes"});
     })
 
 
